@@ -32,8 +32,7 @@ if __name__ == "__main__":
         'CompanyNameCountNum', 'CompanyNameCountX',
         'CompanyNameLen', 'CompanyNameWordLen', 'MortgagesNumMortCharges',
         'MortgagesNumMortOutstanding', 'MortgagesNumMortPartSatisfied',
-        'MortgagesNumMortSatisfied', 'SIC1', 'SIC2', 'SIC3',
-        'country', 'cty', 'eAccountsAccountCategory', 'eCompanyCategory'])
+        'MortgagesNumMortSatisfied', 'SIC1', 'SIC2', 'SIC3'])
 
     print("Loading model...")
     
