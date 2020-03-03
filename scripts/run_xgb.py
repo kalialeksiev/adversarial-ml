@@ -28,9 +28,12 @@ if __name__ == "__main__":
     # to avoid having to convert non-binary categorical variables
     # to a one-hot encoding.
     x, y_true = models.data_util.load_raw_data(args.data, cols=['lat',
-        'long', 'namechanged', 'namechanged2', 'imd', 'imdu', 'nSIC',
-        'oac1', 'CompanyNameCountNum', 'CompanyNameCountX',
-        'CompanyNameLen', 'CompanyNameWordLen'])
+        'long', 'namechanged', 'namechanged2', 'nSIC',
+        'CompanyNameCountNum', 'CompanyNameCountX',
+        'CompanyNameLen', 'CompanyNameWordLen', 'MortgagesNumMortCharges',
+        'MortgagesNumMortOutstanding', 'MortgagesNumMortPartSatisfied',
+        'MortgagesNumMortSatisfied', 'SIC1', 'SIC2', 'SIC3',
+        'country', 'cty', 'eAccountsAccountCategory', 'eCompanyCategory'])
 
     print("Loading model...")
     
