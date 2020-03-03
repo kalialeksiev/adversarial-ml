@@ -6,6 +6,9 @@ __pycache__/
 # Don't store data in the git repo!
 *.pkl
 
+# Don't store model weights in the git repo!
+*.bin
+
 # C extensions
 *.so
 
