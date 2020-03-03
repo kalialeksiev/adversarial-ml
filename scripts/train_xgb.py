@@ -19,7 +19,7 @@ if __name__ == "__main__":
                         default=0.8,
                         help="The proportion of the dataset to use for training.")
     parser.add_argument('--threshold', type=float,
-                        default=0.3,
+                        default=0.5,
                         help="Minimum probability to be considered a 'yes' example.")
 
     args = parser.parse_args()
@@ -59,8 +59,8 @@ if __name__ == "__main__":
         print("Evaluating model... [ on a dataset of size",
               N - N_train, "]")
 
-        # predict probabilities:
-        y_pred = model.predict(x_test)
+        # predict probabilities of positive class:
+        y_pred = model.predict_proba(x_test).T[1].T
         # get the area under the ROC graph:
         fpr, tpr, _ = skl.metrics.roc_curve(y_test, y_pred)
         roc = skl.metrics.auc(fpr, tpr)
