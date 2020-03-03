@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import sklearn as skl
 import argparse as ap
 import models.xgb as xgb
 import models.data_util
@@ -12,9 +13,11 @@ if __name__ == "__main__":
     parser.add_argument('--model', type=str,
         default="data/xgb_model.bin",
         help="Path to the location from which to obtain the trained model.")
-    parser.add_argument('--data', type=str,
-        default="data/Co_600K_Jul2019_6M.pkl",
+    parser.add_argument('data', type=str,
         help="Path to data file to predict on, in Pickle format.")
+    parser.add_argument('--threshold', type=float,
+                        default=0.3,
+                        help="Minimum probability to be considered a 'yes' example.")
     
     args = parser.parse_args()
 
@@ -35,9 +38,19 @@ if __name__ == "__main__":
 
     print("Predicting...")
 
+    # predict probabilities:
     y_pred = model.predict(x)
+    # get the area under the ROC graph:
+    fpr, tpr, _ = skl.metrics.roc_curve(y_true, y_pred)
+    roc = skl.metrics.auc(fpr, tpr)
+    # convert probabilities to predictions via thresholding:
+    y_pred = models.data_util.threshold(y_pred, args.threshold)
 
-    print("Results:",
-        np.count_nonzero(y_true == y_pred),
-        "correct predictions, out of",
-        len(y_true))
+    # compute accuracy separately on positive and negative examples
+    true_neg, true_pos = models.data_util.get_accuracy(
+        y_true, y_pred
+    )
+
+    print("Results:", "True negative rate =",
+          true_neg, "True positive rate =", true_pos,
+          "ROC curve =", roc)

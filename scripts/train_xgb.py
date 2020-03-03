@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import sklearn as skl
 import argparse as ap
 import models.xgb as xgb
 import models.data_util
@@ -17,7 +18,10 @@ if __name__ == "__main__":
     parser.add_argument('--train_test_split', type=float,
                         default=0.8,
                         help="The proportion of the dataset to use for training.")
-    
+    parser.add_argument('--threshold', type=float,
+                        default=0.3,
+                        help="Minimum probability to be considered a 'yes' example.")
+
     args = parser.parse_args()
 
     print("Loading training data...")
@@ -29,7 +33,14 @@ if __name__ == "__main__":
     x, y = models.data_util.load_raw_data(args.data, cols=['lat',
         'long', 'namechanged', 'namechanged2', 'imd', 'imdu', 'nSIC',
         'oac1', 'CompanyNameCountNum', 'CompanyNameCountX',
-        'CompanyNameLen', 'CompanyNameWordLen'])
+        'CompanyNameLen', 'CompanyNameWordLen'],
+        shuffle=True)
+
+    # TEMP: make the dataset more balanced by reducing some of the
+    # (abundance of) negative examples.
+    idxs = np.nonzero(y == 1)
+    x = np.concatenate((x[:1000], x[idxs]), axis=0)
+    y = np.concatenate((y[:1000], y[idxs]), axis=0)
 
     # Split data into train/test
     N = len(x)
@@ -44,16 +55,26 @@ if __name__ == "__main__":
     # Train the model:
     model = xgb.from_training_data(x_train, y_train)
 
-    if N_train < N:
+    if N_train < N:  # if we need to perform evaluation...
         print("Evaluating model... [ on a dataset of size",
               N - N_train, "]")
 
+        # predict probabilities:
         y_pred = model.predict(x_test)
+        # get the area under the ROC graph:
+        fpr, tpr, _ = skl.metrics.roc_curve(y_test, y_pred)
+        roc = skl.metrics.auc(fpr, tpr)
+        # convert probabilities to predictions via thresholding:
+        y_pred = models.data_util.threshold(y_pred, args.threshold)
 
-        print("Results:",
-            np.count_nonzero(y_test == y_pred),
-            "correct predictions, out of",
-            len(y_test))
+        # compute accuracy separately on positive and negative examples
+        true_neg, true_pos = models.data_util.get_accuracy(
+            y_test, y_pred
+        )
+
+        print("Results:", "True negative rate =",
+              true_neg, "True positive rate =", true_pos,
+              "ROC curve =", roc)
 
     print("Saving model...")
 
