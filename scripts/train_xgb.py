@@ -12,7 +12,6 @@ if __name__ == "__main__":
         default="data/xgb_model.bin",
         help="Path to the location to store the trained model.")
     parser.add_argument('--data', type=str,
-        default="data/Co_600K_Jul2019_6M.pkl",
         help="Path to data file, in Pickle format.")
     
     args = parser.parse_args()
