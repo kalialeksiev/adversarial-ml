@@ -24,15 +24,27 @@ if __name__ == "__main__":
     print("Loading data...")
 
     # Use helper function to convert everything to numpy etc:
-    # NOTE: we are temporarily selecting a subset of the columns
-    # to avoid having to convert non-binary categorical variables
-    # to a one-hot encoding.
-    x, y_true = models.data_util.load_raw_data(args.data, cols=['lat',
-        'long', 'namechanged', 'namechanged2', 'nSIC',
-        'CompanyNameCountNum', 'CompanyNameCountX',
-        'CompanyNameLen', 'CompanyNameWordLen', 'MortgagesNumMortCharges',
-        'MortgagesNumMortOutstanding', 'MortgagesNumMortPartSatisfied',
-        'MortgagesNumMortSatisfied', 'SIC1', 'SIC2', 'SIC3'])
+    x, y_true = models.data_util.load_raw_data(args.data,
+                                               cols=[
+                                                   'Field*',
+                                                   'Mortgages*',
+                                                   'pos1', 'pos2',
+                                                   'dAccountsLastMadeUpDate',
+                                                   'dAccountsNextDueDate',
+                                                   'dConfStmtLastMadeUpDate',
+                                                   'dConfStmtNextDueDate',
+                                                   'dContextInstant',
+                                                   'dIncorporationDate',
+                                                   'dPreviousName_1CONDATE',
+                                                   'dPreviousName_2CONDATE',
+                                                   'dReturnsLastMadeUpDate',
+                                                   'dReturnsNextDueDate',
+                                                   'eAccountsCategory',
+                                                   'eCompanyCategory',
+                                                   'SIC*', 'nSIC*',
+                                                   'AccountsAccountCategory*',
+                                                   'CompanyCategory*'
+                                               ])
 
     print("Loading model...")
     
