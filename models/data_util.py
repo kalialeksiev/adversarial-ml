@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import re
 
 
 """Load a pickle file containing Pandas data, and turn
@@ -11,7 +12,7 @@ x data matrix.
 `shuffle` : should we shuffle the dataset before returning it?
 """
 def load_raw_data(filename, cols=None, target_col='isfailed', shuffle=False):
-    
+
     df_co = pd.read_pickle(filename)
 
     if shuffle:  # sample (100% of) the rows, which is effectively a shuffle
@@ -19,7 +20,8 @@ def load_raw_data(filename, cols=None, target_col='isfailed', shuffle=False):
     
     x = df_co.drop(target_col, axis=1)
     if cols is not None:
-        x = x[cols]  # select subset of columns
+        col_pred = get_col_matcher(cols)
+        x = x[[col for col in df_co.columns if col_pred(col)]]  # select subset of columns
     x = x.to_numpy()
 
     y = df_co[target_col].to_numpy().reshape((-1,))
@@ -56,3 +58,17 @@ def threshold(y_pred, threshold):
     # way of making y_pred equal to 1 when the probability
     # is greater than this threshold, and 0 otherwise.
     return 1 * (y_pred > threshold)
+
+
+"""Creates and returns a function which, given an input string,
+returns true if that string matches any of the column names, and
+false otherwise. If the strings don't contain the character *, 
+matching is just equality. However, * represents "any string". Thus,
+the column "Field*" matches any string which starts with "Field".
+"""
+def get_col_matcher(cols):
+    # proceed by turning the column names into a regex, then
+    # return a regex checker
+    expr = "|".join(cols).replace('*', '([\s\S]*)')
+    re_obj = re.compile(expr)
+    return lambda s: re_obj.match(s) is not None
