@@ -70,6 +70,11 @@ accounting_field_nums = [  # obtained from the raw_cols list above (note the war
 ]
 
 
+bad_accounting_field_nums = [  # see warning above
+    2267, 2816, 972, 477, 2823
+]
+
+
 if __name__ == "__main__":
     # Parse the command line arguments:
     parser = ap.ArgumentParser()
@@ -130,6 +135,10 @@ if __name__ == "__main__":
 
         # finally, drop the excess column:
         db = db.drop('hasF' + str(n), axis=1)
+    
+    # drop bad accounting fields:
+    for n in bad_accounting_field_nums:
+        db = db.drop('Field' + str(n), axis=1)
 
     print("One-hotting categorical columns...")
 
