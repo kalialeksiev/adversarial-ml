@@ -102,6 +102,10 @@ if __name__ == "__main__":
 
     print("[Applying transform to entire dataset...]")
 
+    # create new columns
+    db['pos1'] = np.NaN
+    db['pos2'] = np.NaN
+
     # now apply the learned transform to the whole dataset:
     # (warning: expensive!)
     db[['pos1', 'pos2']] = transformer.transform(
