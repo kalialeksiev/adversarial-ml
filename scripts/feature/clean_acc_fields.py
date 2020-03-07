@@ -17,6 +17,8 @@ This cleaning process includes:
 - Dropping accounting fields which don't have a corresponding hasFN
   (this is perhaps a bad thing, however these columns don't contain
   strictly numerical data).
+- Optionally applies a logarithm to accounting fields (makes the values
+  much more nicely spread out).
 """
 
 
@@ -28,6 +30,9 @@ if __name__ == "__main__":
         help="Raw input data (PKL file).")
     parser.add_argument('dest', type=str,
         help="Output location (PKL file).")
+    parser.add_argument('--log_data', type=bool,
+        default=True,
+        help="Transform accounting fields by taking logs?")
 
     args = parser.parse_args()
 
@@ -41,15 +46,22 @@ if __name__ == "__main__":
     # fields and the accompanying 'hasFieldN' by letting
     # None represent an empty value
     for n in accounting_field_nums:
+        field_name = 'Field' + str(n)
+        has_field_name = 'hasF' + str(n)
+
         # do a vectorized conditional assignment to None-out the
         # missing fields
-        db.loc[db['hasF' + str(n)] == 0, 'Field' + str(n)] = None
+        db.loc[db[has_field_name] == 0, field_name] = None
 
         # for safety, convert NaNs to Nones
-        db.loc[db['Field' + str(n)] == np.NaN] = None
+        db.loc[db[field_name] == np.NaN] = None
+
+        # convert to log scale
+        if args.log_data:
+            db[field_name] = np.log(db[field_name].to_numpy() + 1.0e-6)
 
         # finally, drop the excess column:
-        db = db.drop('hasF' + str(n), axis=1)
+        db = db.drop(has_field_name, axis=1)
     
     # drop bad accounting fields:
     for n in bad_accounting_field_nums:
