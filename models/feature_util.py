@@ -51,7 +51,7 @@ drop_cols = [  # which columns should we drop?
 
     'AccountsAccountRef*',
 
-    'CompanyID',
+    'CompanyId',
     'CompanyName',
     'CompanyNumber',
     'CompanyStatus',  # this col only has one value across dataset
@@ -64,7 +64,8 @@ drop_cols = [  # which columns should we drop?
 
     # one way we could include these is by converting dates
     # to days elapsed since today?
-    'd*Date', 'dContextInstance'
+    'd*Date', 'dContextInstance',
+    'dPreviousName_*CONDATE'
 ]
 
 

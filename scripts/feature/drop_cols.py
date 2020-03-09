@@ -34,13 +34,9 @@ if __name__ == "__main__":
 
     print("Removing", len(cols_to_remove), "columns...")
 
-    # thankfully, Pandas has a function that does this for us:
-    db = pd.get_dummies(db, prefix=categorical_cols,
-                        columns=categorical_cols)
-
     db = db.drop(cols_to_remove, axis=1)
 
-    print("Removed:", "\n".join(cols_to_remove))
+    print("Removed:", cols_to_remove)
 
     print("Saving resulting database...")
 
