@@ -36,9 +36,42 @@ raw_cols = [  # columns we will consider, as given in the raw data file
 # values, as well as NaN etc.
 
 
+drop_cols = [  # which columns should we drop?
+    'hasGNotice',  # too predictive!
+    'RegAddress*',  # strings, hard to parse
+    'Status20190701',  # only has one unique value
+    'PreviousName_1CompanyName',
+
+    # these only have one value across the whole dataset
+    'LimitedPartnershipsNumGenPartners',
+    'LimitedPartnershipsNumLimPartners',
+
+    'FilingId',
+    'Filled',
+
+    'AccountsAccountRef*',
+
+    'CompanyID',
+    'CompanyName',
+    'CompanyNumber',
+    'CompanyStatus',  # this col only has one value across dataset
+
+    # also drop position related columns, because we
+    # are already using lat/long, so these are redundant:
+    'country', 'cty', 'imd',
+    'imdu', 'oa*', 'oseast1m',
+    'osnrth1m', 'pcd', 'ru11ind',
+
+    # one way we could include these is by converting dates
+    # to days elapsed since today?
+    'd*Date', 'dContextInstance'
+]
+
+
 categorical_cols = [  # which columns should we turn into one-hot?
-    'SIC1', 'SIC2', 'SIC3', 'nSIC',
-    'AccountsAccountCategory', 'CompanyCategory'
+    'SIC1', 'SIC2', 'SIC3',
+    'AccountsAccountCategory', 'CompanyCategory',
+    'eAccountsAccountCategory', 'eCompanyCategory'
 ]
 
 
