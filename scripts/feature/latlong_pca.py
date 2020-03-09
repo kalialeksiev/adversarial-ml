@@ -44,7 +44,8 @@ if __name__ == "__main__":
     print("Projecting 'lat' and 'long'...")
     
     # Create the kernel PCA object (project into 2 dimensions)
-    transformer = KernelPCA(n_components=2, kernel='rbf')
+    transformer = KernelPCA(n_components=2, kernel='rbf',
+                            copy_X=False)
 
     print("[Fitting transform...]")
 
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     # now apply the learned transform to the whole dataset:
     # (warning: expensive!)
     db[['pos1', 'pos2']] = transformer.transform(
-        db[['lat', 'long']].to_numpy()
+        db[['lat', 'long']]
     )
 
     # drop lat and long as they are no longer needed:
