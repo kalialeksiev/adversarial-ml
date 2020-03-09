@@ -29,17 +29,6 @@ if __name__ == "__main__":
     # Use helper function to convert everything to numpy etc:
     x, y = models.data_util.load_raw_data(args.data, shuffle=True)
 
-    # TEMP: make the dataset more balanced by reducing some of the
-    # (abundance of) negative examples.
-    idxs = np.nonzero(y == 1)
-    x = np.concatenate((x[:4000], x[idxs]), axis=0)
-    y = np.concatenate((y[:4000], y[idxs]), axis=0)
-    
-    # Now shuffle the dataset again:
-    idxs = np.random.shuffle(np.arange(len(x)))
-    x = np.squeeze(x[idxs], axis=0)
-    y = np.squeeze(y[idxs], axis=0)
-
     # Split data into train/test
     N = len(x)
     assert(N == len(y))
