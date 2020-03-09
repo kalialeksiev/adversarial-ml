@@ -24,27 +24,7 @@ if __name__ == "__main__":
     print("Loading data...")
 
     # Use helper function to convert everything to numpy etc:
-    x, y_true = models.data_util.load_raw_data(args.data,
-                                               cols=[
-                                                   'Field*',
-                                                   'Mortgages*',
-                                                   'pos1', 'pos2',
-                                                   'dAccountsLastMadeUpDate',
-                                                   'dAccountsNextDueDate',
-                                                   'dConfStmtLastMadeUpDate',
-                                                   'dConfStmtNextDueDate',
-                                                   'dContextInstant',
-                                                   'dIncorporationDate',
-                                                   'dPreviousName_1CONDATE',
-                                                   'dPreviousName_2CONDATE',
-                                                   'dReturnsLastMadeUpDate',
-                                                   'dReturnsNextDueDate',
-                                                   'eAccountsCategory',
-                                                   'eCompanyCategory',
-                                                   'SIC*', 'nSIC*',
-                                                   'AccountsAccountCategory*',
-                                                   'CompanyCategory*'
-                                               ])
+    x, y_true = models.data_util.load_raw_data(args.data)
 
     print("Loading model...")
     

@@ -27,27 +27,7 @@ if __name__ == "__main__":
     print("Loading training data...")
 
     # Use helper function to convert everything to numpy etc:
-    x, y = models.data_util.load_raw_data(args.data, shuffle=True,
-                                          cols=[
-                                              'Field*',
-                                              'Mortgages*',
-                                              'pos1', 'pos2',
-                                              'dAccountsLastMadeUpDate',
-                                              'dAccountsNextDueDate',
-                                              'dConfStmtLastMadeUpDate',
-                                              'dConfStmtNextDueDate',
-                                              'dContextInstant',
-                                              'dIncorporationDate',
-                                              'dPreviousName_1CONDATE',
-                                              'dPreviousName_2CONDATE',
-                                              'dReturnsLastMadeUpDate',
-                                              'dReturnsNextDueDate',
-                                              'eAccountsCategory',
-                                              'eCompanyCategory',
-                                              'SIC*', 'nSIC*',
-                                              'AccountsAccountCategory*',
-                                              'CompanyCategory*'
-                                          ])
+    x, y = models.data_util.load_raw_data(args.data, shuffle=True)
 
     # TEMP: make the dataset more balanced by reducing some of the
     # (abundance of) negative examples.
