@@ -21,8 +21,16 @@ learning_rate : equivalent to XGB's "eta"
 """
 
 
-def from_file(filename, n_threads=4, n_estimators=10,
-              max_depth=4, learning_rate=1.0e-6):
+DEFAULT_NUM_THREADS = 4
+DEFAULT_NUM_ESTIMATORS = 100
+DEFAULT_MAX_DEPTH = 3
+DEFAULT_LEARNING_RATE = 1.0e-2
+
+
+def from_file(filename, n_threads=DEFAULT_NUM_THREADS,
+              n_estimators=DEFAULT_NUM_ESTIMATORS,
+              max_depth=DEFAULT_MAX_DEPTH,
+              learning_rate=DEFAULT_LEARNING_RATE):
     bst = xgb.XGBClassifier(
         n_estimators=n_estimators,
         max_depth=max_depth,
@@ -33,8 +41,10 @@ def from_file(filename, n_threads=4, n_estimators=10,
     return bst
 
 
-def from_training_data(x, y, n_threads=4, n_estimators=10,
-                       max_depth=4, learning_rate=1.0e-6):
+def from_training_data(x, y, n_threads=DEFAULT_NUM_THREADS,
+                       n_estimators=DEFAULT_NUM_ESTIMATORS,
+                       max_depth=DEFAULT_MAX_DEPTH,
+                       learning_rate=DEFAULT_LEARNING_RATE):
     bst = xgb.XGBClassifier(
         n_estimators=n_estimators,
         max_depth=max_depth,

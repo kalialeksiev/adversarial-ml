@@ -64,7 +64,7 @@ drop_cols = [  # which columns should we drop?
 
     # one way we could include these is by converting dates
     # to days elapsed since today?
-    'd*Date', 'dContextInstance',
+    'd*Date', 'dContextInstant',
     'dPreviousName_*CONDATE'
 ]
 
