@@ -56,18 +56,14 @@ if __name__ == "__main__":
 
     print("[Applying transform to entire dataset...]")
 
-    # create new columns
-    db['pos1'] = np.NaN
-    db['pos2'] = np.NaN
+    db[['lat', 'long']] = db[['lat', 'long']].apply(lambda x: np.squeeze(transformer.transform(x.to_numpy().reshape((1, 2)))),
+                                                    axis=1,
+                                                    result_type='expand')
 
-    # now apply the learned transform to the whole dataset:
-    # (warning: expensive!)
-    db[['pos1', 'pos2']] = transformer.transform(
-        db[['lat', 'long']]
-    )
-
-    # drop lat and long as they are no longer needed:
-    db = db.drop(['lat', 'long'], axis=1)
+    # rename columns (rather than creating a new pair of columns)
+    # to be more memory efficient
+    db = db.rename(columns={'lat' : 'pos1',
+                            'long' : 'pos2'})
 
     print("Done. Saving...")
 
