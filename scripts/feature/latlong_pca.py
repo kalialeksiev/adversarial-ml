@@ -4,9 +4,6 @@ import sklearn as skl
 from sklearn.decomposition import KernelPCA
 import argparse as ap
 import pickle
-from models.feature_util import (raw_cols, categorical_cols,
-                                 accounting_field_nums,
-                                 bad_accounting_field_nums)
 
 
 """
