@@ -6,7 +6,8 @@ This project aims to investigate black-box attacks on credit-scoring models, and
 ## Installation
 
 After cloning the repository, change the working directory to the root directory of the project and type the
-command `pip install -r requirements.txt` to install all of the Python packages needed for this project.
+command `pip install -r requirements.txt` to install all of the Python packages needed for this project. Next,
+go to `https://www.graphviz.org/` and install the GraphViz libary. Add the package's `bin` folder to your PATH.
 
 Finally, make sure to place the data sent to us by TradeTeq into the data folder.
 
