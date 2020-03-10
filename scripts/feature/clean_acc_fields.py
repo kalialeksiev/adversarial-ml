@@ -49,19 +49,20 @@ if __name__ == "__main__":
         field_name = 'Field' + str(n)
         has_field_name = 'hasF' + str(n)
 
-        # do a vectorized conditional assignment to None-out the
-        # missing fields
-        db.loc[db[has_field_name] == 0, field_name] = None
+        if has_field_name in db.columns:
+            # do a vectorized conditional assignment to None-out the
+            # missing fields
+            db.loc[db[has_field_name] == 0, field_name] = None
 
-        # for safety, convert NaNs to Nones
-        db.loc[db[field_name] == np.NaN] = None
+            # for safety, convert NaNs to Nones
+            db.loc[db[field_name] == np.NaN] = None
 
-        # convert to log scale
+            # drop the excess column:
+            db = db.drop(has_field_name, axis=1)
+
+        # finally, convert to log scale
         if args.log_data:
             db[field_name] = np.log(db[field_name].to_numpy() + 1.0e-6)
-
-        # finally, drop the excess column:
-        db = db.drop(has_field_name, axis=1)
     
     # drop bad accounting fields:
     for n in bad_accounting_field_nums:

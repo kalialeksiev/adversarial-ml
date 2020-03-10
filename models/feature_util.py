@@ -34,6 +34,8 @@ raw_cols = [  # columns we will consider, as given in the raw data file
 # Field2267, Field2816, Field972, Field477, Field2823
 # I have noticed that these columns, and only these columns (I think), contain None
 # values, as well as NaN, strings, etc.
+# However, after checking, I think Field477 only contains floats, so
+# I have decided to include it anyway.
 
 
 drop_cols = [  # which columns should we drop?
@@ -79,13 +81,13 @@ accounting_field_nums = [  # obtained from the raw_cols list above (note the war
     2502, 2815, 282,
     306, 448, 465,
     474, 487, 489,
-    541, 69, 70
+    541, 69, 70, 477
 ]
 
 
 bad_accounting_field_nums = [  # see warning above
-    2267, 2816, 972, 477, 2823
-]
+    2267, 2816, 972, 2823
+]  # (but note that I have moved field 477 to the list above!)
 
 
 date_cols = [  # columns which are in date format
