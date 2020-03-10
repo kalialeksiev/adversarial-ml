@@ -60,8 +60,7 @@ drop_cols = [  # which columns should we drop?
 
     # also drop position related columns, because we
     # are already using lat/long, so these are redundant:
-    'country', 'cty', 'imd',
-    'imdu', 'oa*', 'oseast1m',
+    'country', 'cty', 'oa*', 'oseast1m',
     'osnrth1m', 'pcd', 'ru11ind'
 ]
 
