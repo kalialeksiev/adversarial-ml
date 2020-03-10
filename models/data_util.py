@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import re
+from datetime import datetime
+from calendar import monthrange
 
 
 """Load a pickle file containing Pandas data, and turn
@@ -72,3 +74,14 @@ def get_col_matcher(cols):
     expr = "|".join(cols).replace('*', '([\s\S]*)')
     re_obj = re.compile(expr)
     return lambda s: re_obj.match(s) is not None
+
+
+"""Given a datetime object, return a decimal equal to the year plus
+the fraction of the year the date is through (e.g. 1st Jan is 0.0,
+the middle of the year is 0.5, 31st Dec is 0.99...).
+"""
+def date_to_decimal(dt):
+    _, days_in_month = monthrange(dt.year, dt.month)
+    return dt.year + (dt.month - 1) / 12.0 + (dt.day - 1) / days_in_month / 12.0
+
+

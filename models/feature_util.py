@@ -33,7 +33,7 @@ raw_cols = [  # columns we will consider, as given in the raw data file
 # WARNING: the following accounting fields do not have a corresponding "hasF...":
 # Field2267, Field2816, Field972, Field477, Field2823
 # I have noticed that these columns, and only these columns (I think), contain None
-# values, as well as NaN etc.
+# values, as well as NaN, strings, etc.
 
 
 drop_cols = [  # which columns should we drop?
@@ -60,12 +60,7 @@ drop_cols = [  # which columns should we drop?
     # are already using lat/long, so these are redundant:
     'country', 'cty', 'imd',
     'imdu', 'oa*', 'oseast1m',
-    'osnrth1m', 'pcd', 'ru11ind',
-
-    # one way we could include these is by converting dates
-    # to days elapsed since today?
-    'd*Date', 'dContextInstant',
-    'dPreviousName_*CONDATE'
+    'osnrth1m', 'pcd', 'ru11ind'
 ]
 
 
@@ -90,6 +85,13 @@ accounting_field_nums = [  # obtained from the raw_cols list above (note the war
 
 bad_accounting_field_nums = [  # see warning above
     2267, 2816, 972, 477, 2823
+]
+
+
+date_cols = [  # columns which are in date format
+    'd*Date',
+    'dContextInstant',
+    'dPreviousName_*CONDATE'
 ]
 
 
