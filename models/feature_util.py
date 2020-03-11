@@ -96,3 +96,8 @@ date_cols = [  # columns which are in date format
 ]
 
 
+optional_cols = [  # fields which a company could choose to not provide
+    'Field*'
+] + date_cols
+
+
