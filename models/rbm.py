@@ -20,16 +20,15 @@ def from_file(filename):
     return bst
 
 
-def from_training_data(x, n_threads=DEFAULT_NUM_THREADS,
-                       n_estimators=DEFAULT_NUM_ESTIMATORS,
-                       max_depth=DEFAULT_MAX_DEPTH,
+def from_training_data(x, n_components=DEFAULT_N_COMPONENTS,
+                       n_iters=DEFAULT_N_ITERS,
                        learning_rate=DEFAULT_LEARNING_RATE):
 
-    rbm = BernoulliRBM(n_components=N_HIDDEN_COMPONENTS,
-                    learning_rate=LEARNING_RATE,
-                    n_iter=N_ITERS,
+    rbm = BernoulliRBM(n_components=n_components,
+                    learning_rate=learning_rate,
+                    n_iter=n_iters,
                     random_state=0)  # random state = 0 just fixes the seed
-    
+
     rbm.fit(x)
 
     return rbm
