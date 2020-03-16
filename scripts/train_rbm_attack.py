@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # compute the columns to train on (only use models.feature_util.optional_cols,
     pred = models.data_util.get_col_matcher(models.feature_util.optional_cols)
-    cols = [col for col in db.columns if pred(col)]
+    cols = [col for col in db.drop(['isfailed'], axis=1).columns if pred(col)]
 
     # compute training data from db (.notna() will turn them into booleans
     # indicating whether or not the fields are present, which is what we're

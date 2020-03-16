@@ -17,7 +17,7 @@ DEFAULT_N_ITERS = 10  # num iterations to do over the dataset during training
 def from_file(filename):
     rbm = pickle.load(open(filename, "rb"))
 
-    return bst
+    return rbm
 
 
 def from_training_data(x, n_components=DEFAULT_N_COMPONENTS,
