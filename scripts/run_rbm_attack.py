@@ -86,8 +86,15 @@ if __name__ == "__main__":
                 j = list(db.columns).index(cols[i])
                 y[0][j] = np.NaN
         
-        print("Corrupt the following columns:", corrupt_cols)
-        print("-->", "changes model value from", model_query(x), "to",
-            model_query(y))
-        print("-->", "changes input likelihood from", np.exp(rbm_model.score_samples(present)), "to",
-            np.exp(rbm_model.score_samples(result)))
+        if len(corrupt_cols) > 0:
+            print("-->", "corrupt the following columns:", corrupt_cols)
+
+            p_prior = model_query(x)
+            p_posterior = model_query(y)
+            print("-->", "changes model value from", p_prior, "to",
+                  p_posterior, "( change of", p_posterior - p_prior, ")")
+            print("-->", "changes input likelihood from",
+                  np.exp(rbm_model.score_samples(present)), "to",
+                  np.exp(rbm_model.score_samples(result)))
+        else:
+            print("-->", "could not change model's output.")
