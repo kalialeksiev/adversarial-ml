@@ -18,9 +18,6 @@ if __name__ == "__main__":
     parser.add_argument('--train_test_split', type=float,
                         default=0.8,
                         help="The proportion of the dataset to use for training.")
-    parser.add_argument('--threshold', type=float,
-                        default=0.5,
-                        help="Minimum probability to be considered a 'yes' example.")
 
     args = parser.parse_args()
 
@@ -51,17 +48,9 @@ if __name__ == "__main__":
         # get the area under the ROC graph:
         fpr, tpr, _ = skl.metrics.roc_curve(y_test, y_pred)
         roc = skl.metrics.auc(fpr, tpr)
-        # convert probabilities to predictions via thresholding:
-        y_pred = models.data_util.threshold(y_pred, args.threshold)
 
-        # compute accuracy separately on positive and negative examples
-        true_neg, true_pos = models.data_util.get_accuracy(
-            y_test, y_pred
-        )
-
-        print("Results:", "True negative rate =",
-              true_neg, "True positive rate =", true_pos,
-              "ROC curve =", roc)
+        print("Results:",
+              "Area under ROC curve =", roc)
 
     print("Saving model...")
 
