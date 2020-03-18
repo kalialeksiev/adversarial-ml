@@ -12,12 +12,9 @@ from models.feature_util import (accounting_field_nums,
 This script will clean all of the accounting fields in the data
 (the fields of the form FieldN for some number N).
 This cleaning process includes:
-- Removing the redundancy with hasFN by setting FieldN to be None
-  when hasFN==0
-- Dropping accounting fields which don't have a corresponding hasFN
-  (this is perhaps a bad thing, however these columns don't contain
-  strictly numerical data).
-- Optionally applies a logarithm to accounting fields (makes the values
+- Dropping some accounting fields which contain strings and are not
+  useful.
+- Transforms accounting fields to log-space (makes the values
   much more nicely spread out).
 """
 
@@ -42,23 +39,9 @@ if __name__ == "__main__":
 
     print("Cleaning accounting fields...")
 
-    # our aim here is to remove the redundancy with the
-    # fields and the accompanying 'hasFieldN' by letting
-    # None represent an empty value
     for n in accounting_field_nums:
         field_name = 'Field' + str(n)
         has_field_name = 'hasF' + str(n)
-
-        if has_field_name in db.columns:
-            # do a vectorized conditional assignment to None-out the
-            # missing fields
-            db.loc[db[has_field_name] == 0, field_name] = None
-
-            # for safety, convert NaNs to Nones
-            db.loc[db[field_name] == np.NaN] = None
-
-            # drop the excess column:
-            db = db.drop(has_field_name, axis=1)
 
         # finally, convert to log scale
         if args.log_data:
