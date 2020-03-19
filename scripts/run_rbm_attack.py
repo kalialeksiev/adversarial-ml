@@ -7,6 +7,7 @@ import models.xgb
 import models.rbm
 import models.feature_util
 import models.data_util
+from attacks.rbm_attack_result import RBMAttackResult
 
 
 """This script will perform the RBM attack to particular
@@ -56,10 +57,16 @@ if __name__ == "__main__":
 
     db = pd.read_pickle("data/clean.pkl")  # TEMP
 
-    # compute the columns to train on (only use models.feature_util.optional_cols,
+    # compute the columns to train on, then put this info into an RBMAttackResult object.
     all_cols = list(db.drop(['isfailed'], axis=1).columns)
-    pred = models.data_util.get_col_matcher(models.feature_util.optional_cols)
-    cols = [col for col in all_cols if pred(col)]
+    pred = models.data_util.get_col_matcher(models.feature_util.date_cols)
+    date_cols = [col for col in all_cols if pred(col)]
+    optional_cols = ['Field' + str(n)
+                     for n in models.feature_util.accounting_field_nums] + date_cols
+    indicator_cols = [('hasF' + str(n) if 'hasF' + str(n) in list(db.columns) else None)
+                      for n in models.feature_util.accounting_field_nums
+                      ] + [None] * len(date_cols)
+    initial_attack_result = RBMAttackResult(all_cols, optional_cols, indicator_cols)
 
     for k in range(args.num_companies):
         print("\nRunning on company", k + 1, "...")
@@ -70,31 +77,24 @@ if __name__ == "__main__":
         result = attacks.rbm_attack.rbm_attack(model_query,
                                                rbm_model, company_data,
                                                args.target_val,
-                                               cols, all_cols,
+                                               initial_attack_result,
                                                threshold=args.threshold,
                                                n_restarts=args.n_restarts)
-
-        present = company_data[cols].notna().to_numpy().reshape((1, -1))
-        x = company_data.to_numpy().reshape((1, -1))
-        y = np.copy(x)
-
-        corrupt_cols = []
-        for i in range(result.shape[-1]):
-            if result[0][i] != present[0][i]:
-                corrupt_cols.append(cols[i])
-                # which column does this correspond to in the original table?
-                j = list(db.columns).index(cols[i])
-                y[0][j] = np.NaN
         
-        if len(corrupt_cols) > 0:
-            print("-->", "corrupt the following columns:", corrupt_cols)
+        if len(result.get_corrupted()) > 0:
+            p_prior_failed, p_prior_true = attacks.rbm_attack.eval_corruption(model_query,
+                rbm_model, company_data, initial_attack_result
+            )
+            p_posterior_failed, p_posterior_true = attacks.rbm_attack.eval_corruption(model_query,
+                rbm_model, company_data, result
+            )
 
-            p_prior = model_query(x)
-            p_posterior = model_query(y)
-            print("-->", "changes model value from", p_prior, "to",
-                  p_posterior, "( change of", p_posterior - p_prior, ")")
-            print("-->", "changes input likelihood from",
-                  np.exp(rbm_model.score_samples(present)), "to",
-                  np.exp(rbm_model.score_samples(result)))
+            print("-->", "corrupt the following columns:", result.get_corrupted())
+
+            print("-->", "changes model value from", p_prior_failed, "to",
+                  p_posterior_failed, "( change of", p_posterior_failed - p_prior_failed, ")")
+            print("-->", "changes input likelihood from", p_prior_true, "to",
+                  p_posterior_true)
+            assert(p_prior_failed != p_posterior_failed)
         else:
             print("-->", "could not change model's output.")

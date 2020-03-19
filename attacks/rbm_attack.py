@@ -3,6 +3,24 @@ import pandas as pd
 import numpy as np
 import models.feature_util
 import models.rbm as rbm
+from attacks.rbm_attack_result import RBMAttackResult
+
+
+def eval_corruption(model_query, rbm_model, company_data, rbm_attack_result):
+    x = company_data.copy()
+    rbm_attack_result.apply_corruption(x)
+    present = company_data.copy()
+    rbm_attack_result.detect_corruption(present)
+
+    # convert both to numpy
+    x = x.to_numpy().reshape((1, -1))
+    present = present.to_numpy().reshape((1, -1))
+
+    # run models
+    p_failed = model_query(x)[0]
+    p_true = np.exp(rbm_model.score_samples(present))
+
+    return p_failed, p_true
 
 
 """Perform the restricted Boltzmann machine attack
@@ -18,62 +36,51 @@ company_data: a row of data for a given company (to be passed
               directly to both models) as a Pandas row.
 target_val: either 1.0 or 0.0 (try to make the model predict
             isfailed==target_val)
-optional_cols: column names that we are allowed to modify
+rbm_attack_result : an RBMAttackResult object which is initialised
+                    with all the columns necessary.
 n_restarts: the number of times to repeat the whole procedure (to
             bootstrap the probability of fooling the model).
 threshold: we will not modify the data if it brings the likelihood
            of being true below this probability.
 
-returns: a boolean mask over the columns in the company data
-         which represents whether or not they should be present
+returns: a new RBMAttackResult object which contains information
+         about the corrupted columns.
 """
 def rbm_attack(model_query, rbm_model, company_data, target_val,
-               optional_cols, all_cols, n_restarts=10, threshold=0.5):
+               rbm_attack_result, n_restarts=10, threshold=0.5):
     # check other inputs
     assert(target_val == 1.0 or target_val == 0.0)
-    assert(len(optional_cols) <= len(all_cols))
-    assert(len(all_cols) == company_data.shape[-1])
 
-    # determine the indices of the columns we are allowed to modify
-    col_indices = [all_cols.index(col) for col in optional_cols]
-    
-    best = None
+    # determine the names and indices of the columns we are allowed to modify
+    (optional_cols, col_indices) = rbm_attack_result.get_corruptible(return_indices=True)
+
+    best = rbm_attack_result
+    p_failed, p_true = eval_corruption(model_query, rbm_model,
+                                        company_data, rbm_attack_result)
 
     for _ in range(n_restarts):
-        # at every restart iteration, restore 'x' and 'present':
-        # convert company row to numpy array
-        x = company_data.to_numpy().reshape((1, -1))
+        # for each restart iteration, start fresh
+        attack_result = rbm_attack_result
 
-        # a boolean vector representing whether data is present or not
-        present = company_data[optional_cols].notna().to_numpy().reshape((1, -1))
+        # shuffle columns so as to corrupt them in a random order
+        random.shuffle(optional_cols)
 
-        if best is None:
-            best = present  # initialise 'best' with default value
+        for col in enumerate(optional_cols):
+            # corrupt this column
+            attack_result = attack_result.corrupt_col(col)
+            # evaluate current set of corrupted columns
+            (p_failed_test,
+             p_true_test) = eval_corruption(model_query, rbm_model,
+                                            company_data, attack_result)
 
-        p_failed = model_query(x)
-        p_true = np.exp(rbm_model.score_samples(present))
+            if p_true_test < threshold:
+                break  # this example has failed, try again on the next restart
 
-        # shuffle indices to try corrupting them in a random order
-        random.shuffle(col_indices)
+            # is this feasible and better than our current best estimate?
+            if abs(p_failed_test - target_val) < abs(p_failed - target_val):
+                print(p_failed_test, p_failed, p_failed_test - p_failed, col)
+                p_failed = p_failed_test
+                p_true = p_true_test
+                best = attack_result  # store our new best attack result
 
-        # try corrupting the columns
-        for j, i in enumerate(col_indices):
-            if present[0][j]:
-                # try corrupting ith column
-                x_test = np.copy(x)
-                present_test = np.copy(present)
-                x_test[0][i] = None
-                present_test[0][j] = False
-                # compute probabilities for this test value:
-                p_failed_test = model_query(x_test)
-                p_true_test = np.exp(rbm_model.score_samples(present_test))
-                # is this feasible and better than our current estimate?
-                if (abs(p_failed_test - target_val) < abs(p_failed - target_val)
-                    and p_true_test >= threshold):
-                    x = x_test
-                    present = present_test
-                    p_failed = p_failed_test
-                    p_true = p_true_test
-                    best = present  # update this
-    
     return best
