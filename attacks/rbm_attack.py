@@ -2,6 +2,7 @@ import random
 import pandas as pd
 import numpy as np
 import models.feature_util
+import models.data_util
 import models.rbm as rbm
 from attacks.rbm_attack_result import RBMAttackResult
 
@@ -13,8 +14,8 @@ def eval_corruption(model_query, rbm_model, company_data, rbm_attack_result):
     rbm_attack_result.detect_corruption(present)
 
     # convert both to numpy
-    x = x.to_numpy().reshape((1, -1))
-    present = present.to_numpy().reshape((1, -1))
+    x = x.to_numpy()
+    present = present.to_numpy()
 
     # run models
     p_failed = model_query(x)[0]
@@ -52,7 +53,7 @@ def rbm_attack(model_query, rbm_model, company_data, target_val,
     assert(target_val == 1.0 or target_val == 0.0)
 
     # determine the names and indices of the columns we are allowed to modify
-    (optional_cols, col_indices) = rbm_attack_result.get_corruptible(return_indices=True)
+    optional_cols, col_indices = rbm_attack_result.get_corruptible(return_indices=True)
 
     best = rbm_attack_result
     p_failed, p_true = eval_corruption(model_query, rbm_model,
@@ -65,7 +66,7 @@ def rbm_attack(model_query, rbm_model, company_data, target_val,
         # shuffle columns so as to corrupt them in a random order
         random.shuffle(optional_cols)
 
-        for col in enumerate(optional_cols):
+        for col in optional_cols:
             # corrupt this column
             attack_result = attack_result.corrupt_col(col)
             # evaluate current set of corrupted columns
@@ -78,9 +79,25 @@ def rbm_attack(model_query, rbm_model, company_data, target_val,
 
             # is this feasible and better than our current best estimate?
             if abs(p_failed_test - target_val) < abs(p_failed - target_val):
-                print(p_failed_test, p_failed, p_failed_test - p_failed, col)
                 p_failed = p_failed_test
                 p_true = p_true_test
                 best = attack_result  # store our new best attack result
 
     return best
+
+
+"""Gets the columns for which we will attempt the RBM attack on.
+Returns two lists: the list of column names to attack, and a list
+containing corresponding indicator columns if applicable (e.g. FieldN
+and hasFN.)
+"""
+def get_rbm_attack_columns(all_cols):
+    # for now, only try corrupting the accounting fields and date columns
+    pred = models.data_util.get_col_matcher(models.feature_util.date_cols)
+    date_cols = [col for col in all_cols if pred(col)]
+    optional_cols = ['Field' + str(n)
+                     for n in models.feature_util.accounting_field_nums] + date_cols
+    indicator_cols = [('hasF' + str(n) if 'hasF' + str(n) in all_cols else None)
+                      for n in models.feature_util.accounting_field_nums
+                      ] + [None] * len(date_cols)
+    return optional_cols, indicator_cols

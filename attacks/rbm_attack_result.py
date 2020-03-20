@@ -47,6 +47,7 @@ class RBMAttackResult:
 
     # add a column to the corrupted list
     def corrupt_col(self, col):
+        assert(isinstance(col, str))
         result = copy.deepcopy(self)
         result.corrupted.append(col)
         return result
@@ -55,7 +56,7 @@ class RBMAttackResult:
     # the given data; "rows" should be a pandas DataFrame.
     # Modifies "rows" directly!
     def apply_corruption(self, rows):
-        assert(rows.shape[0] == len(self.all_cols))
+        assert(rows.shape[1] == len(self.all_cols))
 
         # get the indicator column names of the corrupted columns
         corrupted_indicators = [self.indicator_cols[
@@ -73,11 +74,16 @@ class RBMAttackResult:
     # if and only if it was not present initially, or if it was in a corrupted
     # column. Modifies "rows" directly! "rows" should be a pandas DataFrame.
     def detect_corruption(self, rows):
-        assert(rows.shape[0] == len(self.all_cols))
+        assert(rows.shape[1] == len(self.all_cols))
 
+        # perform corruption:
         rows[self.corrupted] = np.NaN
-        not_corrupted_cols = [col for col in self.all_cols if not col in self.corrupted]
-        rows.drop(not_corrupted_cols, axis=1, inplace=True)
-        rows[self.corrupted] = rows[self.corrupted].notna()
-            
+        
+        # remove columns for which we don't even consider corrupting:
+        not_optional_cols = list(set(self.all_cols) - set(self.optional_cols))
+        rows.drop(not_optional_cols, axis=1, inplace=True)  # inplace is crucial here!
+
+        # now turn corruption into a binary 0/1 flag
+        rows[self.optional_cols] = rows[self.optional_cols].notna()
+
 

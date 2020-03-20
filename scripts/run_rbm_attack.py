@@ -13,6 +13,12 @@ from attacks.rbm_attack_result import RBMAttackResult
 """This script will perform the RBM attack to particular
 rows of the dataset to determine if we can fool the model
 only by removing information about the company.
+
+At the moment the script is currently set up to select companies
+at random and to try modifying their values. This is sufficient
+to demonstrate the potency of such an attack, but of course would
+not be very useful to a company which actually wants to try fooling
+the model for their company in particular.
 """
 
 
@@ -20,6 +26,8 @@ if __name__ == "__main__":
     # Parse the command line arguments:
     parser = ap.ArgumentParser()
 
+    parser.add_argument('data', type=str,
+        help="Path to data file to use, in Pickle format.")
     parser.add_argument('num_companies', type=int,  # TEMP
                         help="The number of randomly chosen companies to attack.")
     parser.add_argument('target_val', type=float,
@@ -42,8 +50,6 @@ if __name__ == "__main__":
                         help="Number of times to attempt the attack procedure ("
                              "increasing this just increases the chance of fooling "
                              "the model.)")
-    # TODO: how to input the company data for us to tweak? How to automatically clean?
-    # (for now I have just loaded the full database below and selected a random row.)
 
     args = parser.parse_args()
 
@@ -55,24 +61,18 @@ if __name__ == "__main__":
 
     rbm_model = models.rbm.from_file(args.rbm_model)
 
-    db = pd.read_pickle("data/clean.pkl")  # TEMP
+    db = pd.read_pickle(args.data)
 
     # compute the columns to train on, then put this info into an RBMAttackResult object.
     all_cols = list(db.drop(['isfailed'], axis=1).columns)
-    pred = models.data_util.get_col_matcher(models.feature_util.date_cols)
-    date_cols = [col for col in all_cols if pred(col)]
-    optional_cols = ['Field' + str(n)
-                     for n in models.feature_util.accounting_field_nums] + date_cols
-    indicator_cols = [('hasF' + str(n) if 'hasF' + str(n) in list(db.columns) else None)
-                      for n in models.feature_util.accounting_field_nums
-                      ] + [None] * len(date_cols)
+    optional_cols, indicator_cols = attacks.rbm_attack.get_rbm_attack_columns(all_cols)
     initial_attack_result = RBMAttackResult(all_cols, optional_cols, indicator_cols)
 
     for k in range(args.num_companies):
         print("\nRunning on company", k + 1, "...")
 
         company_idx = random.choice(list(range(len(db))))  # TEMP
-        company_data = db.drop(['isfailed'], axis=1).iloc[company_idx]
+        company_data = db.drop(['isfailed'], axis=1).iloc[[company_idx]]
 
         result = attacks.rbm_attack.rbm_attack(model_query,
                                                rbm_model, company_data,

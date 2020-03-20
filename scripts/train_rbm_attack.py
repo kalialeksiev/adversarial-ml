@@ -37,9 +37,9 @@ if __name__ == "__main__":
 
     db = pd.read_pickle(args.data)
 
-    # compute the columns to train on (only use models.feature_util.optional_cols,
-    pred = models.data_util.get_col_matcher(models.feature_util.optional_cols)
-    cols = [col for col in db.drop(['isfailed'], axis=1).columns if pred(col)]
+    # compute the columns to train on
+    all_cols = list(db.drop(['isfailed'], axis=1).columns)
+    cols, _ = attacks.rbm_attack.get_rbm_attack_columns(all_cols)
 
     # compute training data from db (.notna() will turn them into booleans
     # indicating whether or not the fields are present, which is what we're
