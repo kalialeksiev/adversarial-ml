@@ -55,9 +55,6 @@ if __name__ == "__main__":
     # subtract current date from all given dates:
     db[cols] -= curdate
 
-    # transform to log space
-    db[cols] = np.log(np.abs(db[cols] + 1.0e-6))
-
     # now compute correlation matrix
 
     corr_mat = db[cols].dropna().corr()
@@ -72,6 +69,12 @@ if __name__ == "__main__":
     print("Dropping columns due to high correlation:", drop_cols)
 
     db = db.drop(drop_cols, axis=1)  # safe because correlation is transitive and symmetric
+
+    print("Transforming to log space...")
+
+    # transform to log space (do this AFTER correlation computations,
+    # as the log obfuscates linear relationships.)
+    db[cols] = np.log(np.abs(db[cols] + 1.0e-6))
 
     print("Saving resulting database...")
 
