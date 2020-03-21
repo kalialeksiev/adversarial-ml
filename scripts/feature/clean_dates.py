@@ -54,6 +54,9 @@ if __name__ == "__main__":
     # subtract current date from all given dates:
     db[cols] -= curdate
 
+    # transform to log space
+    db[cols] = np.log(np.abs(db[cols] + 1.0e-6))
+
     # now compute correlation matrix
 
     corr_mat = db[cols].dropna().corr()
