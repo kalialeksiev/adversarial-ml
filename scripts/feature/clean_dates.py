@@ -72,9 +72,12 @@ if __name__ == "__main__":
 
     print("Transforming to log space...")
 
+    # what date columns are we left with?
+    rest_cols = list(set(cols) - set(drop_cols))
+
     # transform to log space (do this AFTER correlation computations,
     # as the log obfuscates linear relationships.)
-    db[cols] = np.log(np.abs(db[cols] + 1.0e-6))
+    db[rest_cols] = np.log(np.abs(db[rest_cols] + 1.0e-6))
 
     print("Saving resulting database...")
 
