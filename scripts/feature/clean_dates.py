@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import argparse as ap
 import pickle
 from datetime import datetime
@@ -68,6 +69,15 @@ if __name__ == "__main__":
     print("Dropping columns due to high correlation:", drop_cols)
 
     db = db.drop(drop_cols, axis=1)  # safe because correlation is transitive and symmetric
+
+    print("Transforming to log space...")
+
+    # what date columns are we left with?
+    rest_cols = list(set(cols) - set(drop_cols))
+
+    # transform to log space (do this AFTER correlation computations,
+    # as the log obfuscates linear relationships.)
+    db[rest_cols] = np.log(np.abs(db[rest_cols] + 1.0e-6))
 
     print("Saving resulting database...")
 
