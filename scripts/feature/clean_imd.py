@@ -1,6 +1,7 @@
 import pandas as pd
 import argparse as ap
 import pickle
+from sklearn.preprocessing import quantile_transform
 
 
 
@@ -26,13 +27,18 @@ if __name__ == "__main__":
 
     print("Cleaning...")
 
+    # compute the difference between the two fields (I thought
+    # this would be useful because they are both quite similar
+    # fields, so no point having both.)
     db['imdu'] = db['imd'] - db['imdu']
 
-    # standardise:
-    db['imdu'] = (db['imdu'] - db['imdu'].mean()) / db['imdu'].std()
-
-    # rename:
+    # rename the column, as it now represents the difference of imd and imdu:
     db = db.rename(columns={'imdu' : 'imdu_diff'})
+
+    # transform these features (which look like uniform distributions)
+    # into normally-distributed features
+    db[['imd', 'imdu_diff']] = quantile_transform(db[['imd', 'imdu_diff']],
+                                                  output_distribution='normal')
 
     print("Saving resulting database...")
 
