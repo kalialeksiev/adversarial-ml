@@ -27,6 +27,10 @@ if __name__ == "__main__":
 
     print("Imputing...")
 
+    # replace all Nones with NaNs:
+    # (because the imputer below works with NaNs only):
+    db.fillna(value=np.nan, inplace=True)
+
     imp = SimpleImputer(missing_values=np.nan, strategy='mean')
 
     # fit_transform returns a numpy array, but we need to keep
