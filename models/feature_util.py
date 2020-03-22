@@ -31,7 +31,7 @@ raw_cols = [  # columns we will consider, as given in the raw data file
     'hasF541', 'hasF69', 'hasF70'
 ]
 # WARNING: the following accounting fields do not have a corresponding "hasF...":
-# Field2267, Field2816, Field972, Field477, Field2823, Field1129
+# Field2267, Field2816, Field972, Field477, Field2823
 # I have noticed that these columns, and only these columns (I think), contain None
 # values, as well as NaN, strings, etc.
 # However, after checking, I think Field477 only contains floats, so
@@ -88,7 +88,7 @@ accounting_field_nums_names = ['hasF'+str(n) for n in accounting_field_nums]
 
 
 bad_accounting_field_nums = [  # see warning above
-    2267, 2816, 972, 2823, 1129
+    2267, 2816, 972, 2823
 ]  # (but note that I have moved field 477 to the list above!)
 
 

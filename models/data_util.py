@@ -3,73 +3,6 @@ import pandas as pd
 import re
 from datetime import datetime
 from calendar import monthrange
-from .feature_util import drop_cols, categorical_cols, date_cols, bad_accounting_field_nums, accounting_field_nums_names
-
-"""Load data by first mimicking some of the useful scripts 
-in scripts/feature. Drop the columns from the 
-drop_cols list in models/feature_util.py; remove date/time;
-add one-hot to the categorical variable; clean_imd; and clean accounting fields
-Some of these are strings and hence hard to parse or utilize, 
-others are too predictive. Notice: cols is not a list of which columns
-to drop but an optional list of which columns to include
-
-Additionally, load the positive examples first(as there's only 1196 of them)
-and later control how many to include in training
-
-Note: the clean_dates script turns dates to a relative format instead of 
-removing them which might be a better idea in some cases but for the
-purposes of an nn, if we do that we need to retrain the nn every time we
-use it (as clearly time flies mercilessly)  
-"""
-def load_data(filename, cols=None, target_col='isfailed', shuffle=False):
-    # first do same as load_data raw
-    df_co = pd.read_pickle(filename)
-    df_co = df_co.sort_values(by=target_col, ascending=False, axis=0)
-    x = df_co.drop(target_col, axis=1)
-    if cols is not None:
-        col_pred = get_col_matcher(cols)
-        x = x[[col for col in df_co.columns if col_pred(col)]]  # select subset of columns
-
-    y = df_co[target_col].to_numpy().reshape((-1,))
-
-    # prepare to drop columns
-    pred = get_col_matcher(drop_cols)  # a predicate for dropping columns
-    # compute which columns to remove
-    cols_to_remove = [col for col in x.columns if pred(col)]
-    x = x.drop(cols_to_remove, axis=1)
-
-    # turn categorical columns into one-hot
-    x = pd.get_dummies(x, prefix=categorical_cols,
-                        columns=categorical_cols)
-
-    # clean dates
-    pred = get_col_matcher(date_cols)  # a predicate for dropping columns
-    # compute which columns to remove
-    cols_to_remove = [col for col in x.columns if pred(col)]
-    x = x.drop(cols_to_remove, axis=1)
-
-    # standardize 'imd' and 'imdu'
-    x['imdu'] = x['imd'] - x['imdu']
-    # standardise:
-    x['imdu'] = (x['imdu'] - x['imdu'].mean()) / x['imdu'].std()
-    # rename:
-    x = x.rename(columns={'imdu': 'imdu_diff'})
-
-    # drop hasF fields:
-
-    # prepare to drop columns
-    pred = get_col_matcher(accounting_field_nums_names)
-
-    # compute which columns to remove
-    cols_to_remove = [col for col in x.columns if pred(col)]
-    x = x.drop(cols_to_remove, axis=1)
-
-    # finally remove columns with NaNs (those will be FieldN fields where N is a natural number
-    x = x.dropna(axis='columns', how='any')
-
-    # turn the data frame to a nicer numpy format
-    x = x.to_numpy()
-    return x, y
 
 
 """Load a pickle file containing Pandas data, and turn
@@ -95,64 +28,6 @@ def load_raw_data(filename, cols=None, target_col='isfailed', shuffle=False):
 
     y = df_co[target_col].to_numpy().reshape((-1,))
 
-    return x, y
-
-
-""" Same as load_data but this time don't load the positive examples
-in the beginning but let them be spread around
-"""
-
-
-def load_nn_data(filename, cols=None, target_col='isfailed', shuffle=False):
-    # first do same as load_data raw
-    df_co = pd.read_pickle(filename)
-    if shuffle:  # sample (100% of) the rows, which is effectively a shuffle
-        df_co = df_co.sample(frac=1)
-
-    x = df_co.drop(target_col, axis=1)
-    if cols is not None:
-        col_pred = get_col_matcher(cols)
-        x = x[[col for col in df_co.columns if col_pred(col)]]  # select subset of columns
-
-    y = df_co[target_col].to_numpy().reshape((-1,))
-
-    # prepare to drop columns
-    pred = get_col_matcher(drop_cols)  # a predicate for dropping columns
-    # compute which columns to remove
-    cols_to_remove = [col for col in x.columns if pred(col)]
-    x = x.drop(cols_to_remove, axis=1)
-
-    # turn categorical columns into one-hot
-    x = pd.get_dummies(x, prefix=categorical_cols,
-                        columns=categorical_cols)
-
-    # clean dates
-    pred = get_col_matcher(date_cols)  # a predicate for dropping columns
-    # compute which columns to remove
-    cols_to_remove = [col for col in x.columns if pred(col)]
-    x = x.drop(cols_to_remove, axis=1)
-
-    # standardize 'imd' and 'imdu'
-    x['imdu'] = x['imd'] - x['imdu']
-    # standardise:
-    x['imdu'] = (x['imdu'] - x['imdu'].mean()) / x['imdu'].std()
-    # rename:
-    x = x.rename(columns={'imdu': 'imdu_diff'})
-
-    # drop hasF fields:
-
-    # prepare to drop columns
-    pred = get_col_matcher(accounting_field_nums_names)
-
-    # compute which columns to remove
-    cols_to_remove = [col for col in x.columns if pred(col)]
-    x = x.drop(cols_to_remove, axis=1)
-
-    # finally remove columns with NaNs (those will be FieldN fields where N is a natural number
-    x = x.dropna(axis='columns', how='any')
-
-    # turn the data frame to a nicer numpy format
-    x = x.to_numpy()
     return x, y
 
 
