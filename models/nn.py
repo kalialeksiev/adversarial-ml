@@ -25,11 +25,6 @@ def from_training_data(x, y, num_hidden_layers=DEFAULT_NUM_HIDDEN_LAYERS,
                        epochs=DEFAULT_EPOCHS,
                        optimiser=DEFAULT_OPTIMISER,
                        positive_weight=DEFAULT_POSITIVE_WEIGHT):
-
-    # create sample weights (so that the very-outnumbered positive examples
-    # have more weight)
-    w = (y * (positive_weight - 1.0) + 1.0 if positive_weight > 1.0 else None)
-
     y = to_categorical(y.reshape(-1, 1))
 
     # note that the order of batch normalisation and dropout
@@ -57,5 +52,5 @@ def from_training_data(x, y, num_hidden_layers=DEFAULT_NUM_HIDDEN_LAYERS,
     model.fit(x, y, batch_size=batch_size,
               epochs=epochs,
               shuffle=True,
-              sample_weight=w)
+              class_weight={ 0 : 1.0, 1 : positive_weight})
     return model
