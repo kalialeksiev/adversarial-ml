@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
 import sklearn as skl
+import sklearn.metrics
 import argparse as ap
 import models.nn as nn
 import models.data_util
+from tensorflow.python.keras.utils.np_utils import to_categorical
 
 
 if __name__ == "__main__":
@@ -21,6 +23,9 @@ if __name__ == "__main__":
     parser.add_argument('--threshold', type=float,
                         default=0.5,
                         help="Minimum probability to be considered a 'yes' example.")
+    parser.add_argument('--epochs', type=int,
+                        default=nn.DEFAULT_EPOCHS,
+                        help="Minimum probability to be considered a 'yes' example.")
 
     args = parser.parse_args()
 
@@ -37,18 +42,17 @@ if __name__ == "__main__":
     x_train, y_train = x[:N_train], y[:N_train]
     x_test, y_test = x[N_train:], y[N_train:]
 
-    print("Training... [ on a dataset of size", N_train, "]")
+    print("Training for", args.epochs, "epochs... [ on a dataset of size", N, "]")
 
     # Train the model:
-    model = nn.from_training_data(x_train, y_train)
+    model = nn.from_training_data(x_train, y_train, epochs=args.epochs)
 
     if N_train < N:  # if we need to perform evaluation...
         print("Evaluating model... [ on a dataset of size",
               N - N_train, "]")
 
-        # predict probabilities of positive class:
-        y_pred = model.predict(x=x_test, batch_size=200)
-        y_pred = y_pred[:, 1].reshape(y_test.shape)
+        y_pred = model.predict(x_test).T[1].T
+        print(y_pred)
         # get the area under the ROC graph:
         fpr, tpr, _ = skl.metrics.roc_curve(y_test, y_pred)
         roc = skl.metrics.auc(fpr, tpr)
@@ -67,6 +71,6 @@ if __name__ == "__main__":
     print("Saving model...")
 
     # Save model and then exit:
-    model.save(filename=args.out_model, overwrite=True)
+    model.save(filepath=args.out_model, overwrite=True)
 
     print("Done.")
