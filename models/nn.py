@@ -32,7 +32,7 @@ def from_training_data(x, y, num_hidden_layers=DEFAULT_NUM_HIDDEN_LAYERS,
     # https://stackoverflow.com/questions/39691902/ordering-of-batch-normalization-and-dropout
 
     model = Sequential()
-    model.add(Dense(layer_size, input_shape=(x.shape[1],),
+    model.add(Dense(2 * layer_size, input_shape=(x.shape[1],),
                     activation=None))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
