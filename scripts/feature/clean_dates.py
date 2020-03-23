@@ -79,6 +79,13 @@ if __name__ == "__main__":
     # as the log obfuscates linear relationships.)
     db[rest_cols] = np.log(np.abs(db[rest_cols] + 1.0e-6))
 
+    print("Creating presence indicators...")
+
+    # create a set of indicator columns to demonstrate the presence/absence
+    # of each date input:
+    ind_cols = ["has_" + col for col in rest_cols]
+    db[ind_cols] = db[rest_cols].notna()
+
     print("Saving resulting database...")
 
     pickle.dump(db, open(args.dest, "wb"))
