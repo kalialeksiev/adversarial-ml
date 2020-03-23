@@ -9,6 +9,7 @@ DEFAULT_NUM_HIDDEN_LAYERS = 3
 DEFAULT_LAYER_SIZE = 1024
 DEFAULT_BATCH_SIZE = 10000
 DEFAULT_EPOCHS = 10
+DEFAULT_OPTIMISER = 'adam'
 
 
 def from_file(filename):
@@ -18,7 +19,8 @@ def from_file(filename):
 def from_training_data(x, y, num_hidden_layers=DEFAULT_NUM_HIDDEN_LAYERS,
                        layer_size=DEFAULT_LAYER_SIZE,
                        batch_size=DEFAULT_BATCH_SIZE,
-                       epochs=DEFAULT_EPOCHS):
+                       epochs=DEFAULT_EPOCHS,
+                       optimiser=DEFAULT_OPTIMISER):
 
     y = to_categorical(y.reshape(-1, 1))
 
@@ -42,7 +44,7 @@ def from_training_data(x, y, num_hidden_layers=DEFAULT_NUM_HIDDEN_LAYERS,
     model.add(Dense(2, activation='softmax'))
 
     model.compile(loss='categorical_crossentropy',
-                  optimizer='adam')
+                  optimizer=optimiser)
     model.fit(x, y, batch_size=batch_size,
               epochs=epochs,
               shuffle=True)

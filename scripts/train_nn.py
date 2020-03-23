@@ -25,7 +25,19 @@ if __name__ == "__main__":
                         help="Minimum probability to be considered a 'yes' example.")
     parser.add_argument('--epochs', type=int,
                         default=nn.DEFAULT_EPOCHS,
-                        help="Minimum probability to be considered a 'yes' example.")
+                        help="Number of epochs of training (passes over the whole dataset).")
+    parser.add_argument('--batch_size', type=int,
+                        default=nn.DEFAULT_BATCH_SIZE,
+                        help="Training batch size.")
+    parser.add_argument('--hidden_layers', type=int,
+                        default=nn.DEFAULT_NUM_HIDDEN_LAYERS,
+                        help="The number of hidden layers to use.")
+    parser.add_argument('--layer_size', type=int,
+                        default=nn.DEFAULT_LAYER_SIZE,
+                        help="The size of each hidden layer.")
+    parser.add_argument('--optimiser', type=str,
+                        default=nn.DEFAULT_OPTIMISER,
+                        help="The type of optimiser (e.g. 'adam' or 'sgd').")
 
     args = parser.parse_args()
 
@@ -45,7 +57,10 @@ if __name__ == "__main__":
     print("Training for", args.epochs, "epochs... [ on a dataset of size", N, "]")
 
     # Train the model:
-    model = nn.from_training_data(x_train, y_train, epochs=args.epochs)
+    model = nn.from_training_data(x_train, y_train, epochs=args.epochs,
+                                  batch_size=args.batch_size, layer_size=args.layer_size,
+                                  num_hidden_layers=args.hidden_layers,
+                                  optimiser=args.optimiser)
 
     if N_train < N:  # if we need to perform evaluation...
         print("Evaluating model... [ on a dataset of size",
