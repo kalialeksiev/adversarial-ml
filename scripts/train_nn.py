@@ -54,7 +54,7 @@ if __name__ == "__main__":
     x_train, y_train = x[:N_train], y[:N_train]
     x_test, y_test = x[N_train:], y[N_train:]
 
-    print("Training for", args.epochs, "epochs... [ on a dataset of size", N, "]")
+    print("Training for", args.epochs, "epochs... [ on a dataset of size", N_train, "]")
 
     # Train the model:
     model = nn.from_training_data(x_train, y_train, epochs=args.epochs,
