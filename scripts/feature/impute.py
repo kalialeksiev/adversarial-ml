@@ -36,7 +36,7 @@ if __name__ == "__main__":
     # fit_transform returns a numpy array, but we need to keep
     # db as a pandas DataFrame. Thus we can use the little trick
     # of writing db[db.columns] = ... rather than just db = ...
-    db[db.columns] = imp.fit_transform(db)
+    db[db.columns] = imp.fit_transform(db.astype(float))
 
     print("Saving resulting database...")
 
