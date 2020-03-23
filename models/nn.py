@@ -16,7 +16,7 @@ DEFAULT_POSITIVE_WEIGHT = 600.0
 
 
 def from_file(filename):
-    return tf.keras.load_model(filename)
+    return tensorflow.python.keras.load_model(filename)
 
 
 def from_training_data(x, y, num_hidden_layers=DEFAULT_NUM_HIDDEN_LAYERS,
