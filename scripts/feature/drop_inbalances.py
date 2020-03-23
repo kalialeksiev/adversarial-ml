@@ -35,10 +35,9 @@ if __name__ == "__main__":
 
     cols_to_drop = []
     for col in db.columns:
-        if db[col].nunique(dropna=False) == 2:
-            unique, counts = np.unique(db[col], return_counts=True)
-            if counts[0] >= thresh or counts[1] >= thresh:
-                cols_to_drop.append(col)
+        _, col_dist = np.unique(db[col], return_counts=True)
+        if np.any(col_dist >= thresh):
+            cols_to_drop.append(col)
 
     print("Dropping columns", cols_to_drop)
 
