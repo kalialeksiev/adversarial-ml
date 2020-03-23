@@ -99,5 +99,5 @@ def get_rbm_attack_columns(all_cols):
                      for n in models.feature_util.accounting_field_nums] + date_cols
     indicator_cols = [('hasF' + str(n) if 'hasF' + str(n) in all_cols else None)
                       for n in models.feature_util.accounting_field_nums
-                      ] + [None] * len(date_cols)
+                      ] + ['has_' + col for col in date_cols]
     return optional_cols, indicator_cols
