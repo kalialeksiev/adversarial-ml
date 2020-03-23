@@ -67,7 +67,6 @@ if __name__ == "__main__":
               N - N_train, "]")
 
         y_pred = model.predict(x_test).T[1].T
-        print(y_pred)
         # get the area under the ROC graph:
         fpr, tpr, _ = skl.metrics.roc_curve(y_test, y_pred)
         roc = skl.metrics.auc(fpr, tpr)
