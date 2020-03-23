@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import argparse as ap
 import pickle
 from datetime import datetime
@@ -25,6 +26,10 @@ if __name__ == "__main__":
         help="Output location (PKL file).")
     parser.add_argument('date', type=str,
         help="The data sampling date in DD/MM/YYYY format.")
+    parser.add_argument('--drop_threshold', type=float,
+                        default=0.98,
+                        help="If two variables correlate more than"
+                             " this value, one of them will be dropped.")
 
     args = parser.parse_args()
 
@@ -49,6 +54,30 @@ if __name__ == "__main__":
 
     # subtract current date from all given dates:
     db[cols] -= curdate
+
+    # now compute correlation matrix
+
+    corr_mat = db[cols].dropna().corr()
+
+    # remove columns which correlate highly with another column
+    drop_cols = []
+    for i, col_i in enumerate(cols):
+        for j, col_k in enumerate(cols[i+1:]):
+            k = j + i + 1
+            if abs(corr_mat[col_i][col_k]) > args.drop_threshold:
+                drop_cols.append(col_k)
+    print("Dropping columns due to high correlation:", drop_cols)
+
+    db = db.drop(drop_cols, axis=1)  # safe because correlation is transitive and symmetric
+
+    print("Transforming to log space...")
+
+    # what date columns are we left with?
+    rest_cols = list(set(cols) - set(drop_cols))
+
+    # transform to log space (do this AFTER correlation computations,
+    # as the log obfuscates linear relationships.)
+    db[rest_cols] = np.log(np.abs(db[rest_cols] + 1.0e-6))
 
     print("Saving resulting database...")
 

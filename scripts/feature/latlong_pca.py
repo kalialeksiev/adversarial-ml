@@ -31,6 +31,15 @@ if __name__ == "__main__":
     parser.add_argument('--fitting_frac', type=float,
         default=3000.0/600000.0,
         help="The fraction of the data to fit the PCA to.")
+    parser.add_argument('--load_transform', type=str,
+                        default=None,
+                        help="Optionally provide a filename from"
+                             " which to load the kernel PCA transform")
+    parser.add_argument('--save_transform', type=str,
+                        default=None,
+                        help="Optionally provide a filename where we"
+                             " will save the kernel PCA transform once"
+                             " fitted.")
 
     args = parser.parse_args()
 
@@ -44,15 +53,23 @@ if __name__ == "__main__":
     transformer = KernelPCA(n_components=2, kernel='rbf',
                             copy_X=False)
 
-    print("[Fitting transform...]")
+    if args.load_transform is None:
+        print("[Fitting transform...]")
 
-    # only fit the kernel PCA to a subset of the data, because
-    # this fitting process is O(n^2) memory, and would require
-    # about 2 TB of RAM!
-    # Thus only fit to a certain fraction of the dataset:
-    transformer.fit_transform(
-        db[['lat', 'long']].sample(frac=args.fitting_frac)
-    )
+        # only fit the kernel PCA to a subset of the data, because
+        # this fitting process is O(n^2) memory, and would require
+        # about 2 TB of RAM!
+        # Thus only fit to a certain fraction of the dataset:
+        transformer.fit_transform(
+            db[['lat', 'long']].sample(frac=args.fitting_frac)
+        )
+
+        if args.save_transform is not None:
+            print("[Saving transform to", args.save_transform, "]")
+            pickle.dump(transformer, open(args.save_transform, "wb"))
+    else:
+        print("[Loading transform from", args.load_transform, "]")
+        transformer = pickle.load(open(args.load_transform, "rb"))
 
     print("[Applying transform to entire dataset...]")
 
