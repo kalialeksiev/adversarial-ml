@@ -38,6 +38,9 @@ if __name__ == "__main__":
     parser.add_argument('--optimiser', type=str,
                         default=nn.DEFAULT_OPTIMISER,
                         help="The type of optimiser (e.g. 'adam' or 'sgd').")
+    parser.add_argument('--positive_weight', type=float,
+                        default=nn.DEFAULT_POSITIVE_WEIGHT,
+                        help="The relative weighting of the positive (failed) companies.")
 
     args = parser.parse_args()
 
@@ -60,7 +63,8 @@ if __name__ == "__main__":
     model = nn.from_training_data(x_train, y_train, epochs=args.epochs,
                                   batch_size=args.batch_size, layer_size=args.layer_size,
                                   num_hidden_layers=args.hidden_layers,
-                                  optimiser=args.optimiser)
+                                  optimiser=args.optimiser,
+                                  positive_weight=args.positive_weight)
 
     if N_train < N:  # if we need to perform evaluation...
         print("Evaluating model... [ on a dataset of size",

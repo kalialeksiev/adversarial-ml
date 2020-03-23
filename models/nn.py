@@ -5,11 +5,14 @@ from tensorflow.python.keras.layers import (Flatten, Dropout, Dense,
 from tensorflow.python.keras.utils.np_utils import to_categorical
 
 
-DEFAULT_NUM_HIDDEN_LAYERS = 3
+DEFAULT_NUM_HIDDEN_LAYERS = 4
 DEFAULT_LAYER_SIZE = 1024
 DEFAULT_BATCH_SIZE = 10000
-DEFAULT_EPOCHS = 10
+DEFAULT_EPOCHS = 5
 DEFAULT_OPTIMISER = 'adam'
+# 600 makes the loss split equally between +ve and -ve examples, because there
+# are approximately 600x as many -ve examples as +ve ones.
+DEFAULT_POSITIVE_WEIGHT = 600.0
 
 
 def from_file(filename):
@@ -20,7 +23,12 @@ def from_training_data(x, y, num_hidden_layers=DEFAULT_NUM_HIDDEN_LAYERS,
                        layer_size=DEFAULT_LAYER_SIZE,
                        batch_size=DEFAULT_BATCH_SIZE,
                        epochs=DEFAULT_EPOCHS,
-                       optimiser=DEFAULT_OPTIMISER):
+                       optimiser=DEFAULT_OPTIMISER,
+                       positive_weight=DEFAULT_POSITIVE_WEIGHT):
+
+    # create sample weights (so that the very-outnumbered positive examples
+    # have more weight)
+    w = (y * (positive_weight - 1.0) + 1.0 if positive_weight > 1.0 else None)
 
     y = to_categorical(y.reshape(-1, 1))
 
@@ -41,11 +49,13 @@ def from_training_data(x, y, num_hidden_layers=DEFAULT_NUM_HIDDEN_LAYERS,
         model.add(Activation('relu'))
         model.add(Dropout(0.5))
 
+    model.add(Dense(128, activation='relu'))
     model.add(Dense(2, activation='softmax'))
 
     model.compile(loss='categorical_crossentropy',
                   optimizer=optimiser)
     model.fit(x, y, batch_size=batch_size,
               epochs=epochs,
-              shuffle=True)
+              shuffle=True,
+              sample_weight=w)
     return model
