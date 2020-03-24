@@ -3,6 +3,7 @@ from tensorflow.python.keras import Sequential
 from tensorflow.python.keras.layers import (Flatten, Dropout, Dense,
                                             BatchNormalization, Activation)
 from tensorflow.python.keras.utils.np_utils import to_categorical
+from tensorflow.python.keras.regularizers import l2
 
 
 DEFAULT_NUM_HIDDEN_LAYERS = 4
@@ -28,7 +29,7 @@ def from_training_data(x, y, num_hidden_layers=DEFAULT_NUM_HIDDEN_LAYERS,
     y = to_categorical(y.reshape(-1, 1))
 
     # note that the order of batch normalisation and dropout
-    # matters; see:
+    # and the activation matters; see:
     # https://stackoverflow.com/questions/39691902/ordering-of-batch-normalization-and-dropout
 
     model = Sequential()
@@ -36,10 +37,10 @@ def from_training_data(x, y, num_hidden_layers=DEFAULT_NUM_HIDDEN_LAYERS,
                     activation=None))
     model.add(BatchNormalization())
     model.add(Activation('relu'))
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.2))  # less dropout for input layer
 
     for i in range(num_hidden_layers):
-        model.add(Dense(layer_size, activation=None))
+        model.add(Dense(layer_size, activation=None, kernel_regularizer=l2(1.0e-3)))
         model.add(BatchNormalization())
         model.add(Activation('relu'))
         model.add(Dropout(0.5))
