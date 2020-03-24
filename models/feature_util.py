@@ -83,9 +83,6 @@ accounting_field_nums = [  # obtained from the raw_cols list above (note the war
     541, 69, 70, 477
 ]
 
-# the actual string names of the hasF fields above
-accounting_field_nums_names = ['hasF'+str(n) for n in accounting_field_nums]
-
 
 bad_accounting_field_nums = [  # see warning above
     2267, 2816, 972, 2823
