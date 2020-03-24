@@ -14,3 +14,9 @@ This folder is for data-cleaning scripts. Most of these scripts use information 
 - `impute` : fill in all missing values (NaNs and Nones). Warning: this does not create corresponding indicator columns, so information may be lost if one is not careful,
 - `drop_correlations` : drop any column which highly correlates with other columns (so is redundant),
 - `std_scale` : convert all non-binary columns to have mean 0 variance 1.
+
+## Recommended order:
+
+The first six scripts in the list above can be done in any order, really. The `drop_inbalances` and `drop_correlations` scripts should be done next, as they will operate on the modified columns, for example operating on the results from `onehot`. Finally, do the `impute` and `std_scale` scripts; doing these last reduces unnecessary work in imputing columns that would be dropped anyway.
+
+For the neural network model, it is recommended to run all of these scripts (and doing so results in the possibility of obtaining around 0.9 AUROC). For the XGBoost model, it will work fine without the `impute` script (because it naturally handles NaNs anyway) but you may still want to use it - still use all other scripts for XGBoost.
