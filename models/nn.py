@@ -28,23 +28,27 @@ def from_training_data(x, y, num_hidden_layers=DEFAULT_NUM_HIDDEN_LAYERS,
                        positive_weight=DEFAULT_POSITIVE_WEIGHT):
     y = to_categorical(y.reshape(-1, 1))
 
-    # note that the order of batch normalisation and dropout
+    # NOTE: the order of batch normalisation and dropout
     # and the activation matters; see:
     # https://stackoverflow.com/questions/39691902/ordering-of-batch-normalization-and-dropout
 
     model = Sequential()
+    # slightly bigger first layer to extract as many features as possible from the input
     model.add(Dense(2 * layer_size, input_shape=(x.shape[1],),
                     activation=None))
-    model.add(BatchNormalization())
+    model.add(BatchNormalization())  # batch norm before activation
     model.add(Activation('relu'))
     model.add(Dropout(0.2))  # less dropout for input layer
 
-    for i in range(num_hidden_layers):
+    for _ in range(num_hidden_layers):
+        # add l2 regularisation
         model.add(Dense(layer_size, activation=None, kernel_regularizer=l2(1.0e-3)))
-        model.add(BatchNormalization())
+        model.add(BatchNormalization())  # batch norm before activation
         model.add(Activation('relu'))
         model.add(Dropout(0.5))
 
+    # finally, collect together a small collection of features
+    # for predicting the class probabilities in the last layer.
     model.add(Dense(128, activation='relu'))
     model.add(Dense(2, activation='softmax'))
 
