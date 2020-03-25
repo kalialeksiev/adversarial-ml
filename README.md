@@ -45,7 +45,7 @@ In order to train and run the neural network model, follow these steps:
 The RBM (restricted Boltzmann machine) attack tries to fool the model by removing information about a company only. To perform the attack:
 - CD to the root repo directory,
 - Ensure you have the cleaned data in the "data" folder, and an already trained XGBoost model on that data,
-- Execute `python scripts/train_rbm_attack.py <training_data_clean>` to train the RBM model for the attack,
-- Execute `python scripts/run_rbm_attack.py <training_data_clean> <num companies to try> <target value>` where you have to provide the number of companies you'd like to try running the attack on (each company will be randomly picked from the dataset) and the target value must be either 0 or 1, where 1 means the attack will try to fool the model into predicting a 1 for `isfailed`, etc.
+- Execute `python -m scripts.train_rbm_attack <training_data_clean>` to train the RBM model for the attack,
+- Execute `python -m scripts.run_rbm_attack <training_data_clean> <num companies to try> <target value>` where you have to provide the number of companies you'd like to try running the attack on (each company will be randomly picked from the dataset) and the target value must be either 0 or 1, where 1 means the attack will try to fool the model into predicting a 1 for `isfailed`, etc.
 Of course, this attack is quite restricted (it can *only* try removing data about a company to fool the model). This attack is more of a sanity-check to ensure that the model isn't gullible enough to fall for something like this.
 
