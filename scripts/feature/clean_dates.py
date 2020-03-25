@@ -64,7 +64,8 @@ if __name__ == "__main__":
     for i, col_i in enumerate(cols):
         for j, col_k in enumerate(cols[i+1:]):
             k = j + i + 1
-            if abs(corr_mat[col_i][col_k]) > args.drop_threshold:
+            if (abs(corr_mat[col_i][col_k]) > args.drop_threshold
+                and not col_k in drop_cols):
                 drop_cols.append(col_k)
     print("Dropping columns due to high correlation:", drop_cols)
 
